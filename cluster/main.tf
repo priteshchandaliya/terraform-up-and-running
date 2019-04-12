@@ -95,3 +95,13 @@ resource "aws_security_group" "elb_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 }
+
+data "terraform_remote_state" "db" {
+    backend = "s3"
+
+    config {
+        bucket = "pritesh-test-terraform"
+        key = "Users/EPSHCYA/Desktop/terraform_practise/database/terraform.tfstate"
+        region = "us-east-1"
+    }
+}
