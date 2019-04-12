@@ -3,28 +3,22 @@ provider "aws" {
     version = "2.5.0"
 }
 
-variable "server_port" {
-    description = "port on which the webserver will be listening"
-    default = 8080
-}
-
-output "elb_dns_name" {
-    value = "${aws_elb.loadbalancer.dns_name}"
-}
-
 resource "aws_launch_configuration" "cluster_conf" {
     image_id = "ami-40d28157"
     instance_type = "t2.micro"
     security_groups = ["${aws_security_group.instance.id}"]
+    user_data = "${data.template_file.user_data.rendered}"
 
-    user_data = <<-EOF
-                #!/bin/bash
-                echo "Hello, Pritesh" > index.html
-                nohup busybox httpd -f -p "${var.server_port}" &
-                EOF
-    
     lifecycle {
         create_before_destroy = true
+    }
+}
+
+data "template_file" "user_data" {
+    template = "${file("user_data.sh")}"
+
+    vars {
+        server_port = "${var.server_port}"
     }
 }
 
